@@ -1,0 +1,8 @@
+@import "tailwindcss";
+
+@theme {
+  --color-coral: #C24E2A;
+  --color-coral-dark: #a03e20;
+  --color-coral-light: #f5ede9;
+  --font-serif: Georgia, "Times New Roman", serif;
+}
