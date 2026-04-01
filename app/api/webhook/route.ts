@@ -1,57 +1,45 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createHmac, timingSafeEqual } from "crypto";
+import Stripe from "stripe";
 import { redis, SESSION_TTL } from "@/lib/redis";
 import { runPaidAnalysis } from "@/lib/claude";
 import { sendResultsEmail } from "@/lib/email";
 import type { PaidAnalysis } from "@/lib/types";
 
-function verifySignature(rawBody: string, signature: string): boolean {
-  const secret = process.env.LEMONSQUEEZY_WEBHOOK_SECRET!;
-  const digest = createHmac("sha256", secret).update(rawBody).digest("hex");
-  try {
-    return timingSafeEqual(Buffer.from(digest), Buffer.from(signature));
-  } catch {
-    return false;
-  }
+function getStripe() {
+  return new Stripe(process.env.STRIPE_SECRET_KEY!, {
+    apiVersion: "2026-03-25.dahlia",
+  });
 }
 
 export async function POST(req: NextRequest) {
-  const signature = req.headers.get("x-signature");
-  if (!signature) {
+  const sig = req.headers.get("stripe-signature");
+  if (!sig) {
     return NextResponse.json({ error: "Missing signature" }, { status: 400 });
   }
 
-  const rawBody = await req.text();
-
-  if (!verifySignature(rawBody, signature)) {
-    console.error("Lemon Squeezy webhook signature verification failed");
+  let event: Stripe.Event;
+  try {
+    const rawBody = await req.text();
+    event = getStripe().webhooks.constructEvent(
+      rawBody,
+      sig,
+      process.env.STRIPE_WEBHOOK_SECRET!
+    );
+  } catch (err) {
+    console.error("Webhook signature verification failed:", err);
     return NextResponse.json(
       { error: "Invalid webhook signature" },
       { status: 400 }
     );
   }
 
-  let payload: Record<string, unknown>;
-  try {
-    payload = JSON.parse(rawBody);
-  } catch {
-    return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
-  }
-
-  const eventName = payload.meta &&
-    typeof payload.meta === "object" &&
-    "event_name" in (payload.meta as object)
-      ? (payload.meta as Record<string, unknown>).event_name
-      : null;
-
-  if (eventName === "order_created") {
-    const meta = payload.meta as Record<string, unknown>;
-    const customData = meta.custom_data as Record<string, string> | undefined;
-    const sessionId = customData?.sessionId;
-    const email = customData?.email ?? "";
+  if (event.type === "checkout.session.completed") {
+    const session = event.data.object as Stripe.Checkout.Session;
+    const sessionId = session.metadata?.sessionId;
+    const email = session.metadata?.email ?? session.customer_email ?? "";
 
     if (!sessionId) {
-      console.error("No sessionId in Lemon Squeezy custom_data");
+      console.error("No sessionId in Stripe metadata");
       return NextResponse.json({ received: true });
     }
 
@@ -63,9 +51,9 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ received: true });
       }
 
-      const sessionMeta =
+      const meta =
         typeof metaRaw === "string" ? JSON.parse(metaRaw) : metaRaw;
-      const statement: string = sessionMeta.statement;
+      const statement: string = meta.statement;
 
       // Run paid analysis
       const rawJson = await runPaidAnalysis(statement);
@@ -97,7 +85,7 @@ export async function POST(req: NextRequest) {
       }
     } catch (err) {
       console.error("Error processing paid analysis:", err);
-      // Return 200 to prevent Lemon Squeezy from retrying for non-retriable errors
+      // Return 200 to prevent Stripe from retrying for non-retriable errors
       return NextResponse.json({ received: true });
     }
   }

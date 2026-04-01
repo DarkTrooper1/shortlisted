@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { lemonSqueezySetup, createCheckout } from "@lemonsqueezy/lemonsqueezy.js";
+import Stripe from "stripe";
 import { redis } from "@/lib/redis";
 
-function setupLS() {
-  lemonSqueezySetup({ apiKey: process.env.LEMONSQUEEZY_API_KEY! });
+function getStripe() {
+  return new Stripe(process.env.STRIPE_SECRET_KEY!, {
+    apiVersion: "2026-03-25.dahlia",
+  });
 }
 
 export async function POST(req: NextRequest) {
@@ -32,31 +34,24 @@ export async function POST(req: NextRequest) {
     const baseUrl =
       process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3000";
 
-    setupLS();
-
-    const { data, error } = await createCheckout(
-      process.env.LEMONSQUEEZY_STORE_ID!,
-      process.env.LEMONSQUEEZY_VARIANT_ID!,
-      {
-        checkoutData: {
-          email: email || undefined,
-          custom: { sessionId, email },
+    const checkoutSession = await getStripe().checkout.sessions.create({
+      mode: "payment",
+      line_items: [
+        {
+          price: process.env.STRIPE_PRICE_ID!,
+          quantity: 1,
         },
-        productOptions: {
-          redirectUrl: `${baseUrl}/results?id=${sessionId}&paid=true`,
-        },
-      }
-    );
+      ],
+      customer_email: email || undefined,
+      metadata: {
+        sessionId,
+        email,
+      },
+      success_url: `${baseUrl}/results?id=${sessionId}&paid=true`,
+      cancel_url: `${baseUrl}/results?id=${sessionId}`,
+    });
 
-    if (error || !data?.data?.attributes?.url) {
-      console.error("Lemon Squeezy createCheckout error:", error);
-      return NextResponse.json(
-        { error: "Failed to create checkout session" },
-        { status: 500 }
-      );
-    }
-
-    return NextResponse.json({ url: data.data.attributes.url });
+    return NextResponse.json({ url: checkoutSession.url });
   } catch (err) {
     console.error("/api/checkout error:", err);
     return NextResponse.json(

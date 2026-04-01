@@ -10,13 +10,13 @@
   "license": "ISC",
   "dependencies": {
     "@anthropic-ai/sdk": "^0.80.0",
-    "@lemonsqueezy/lemonsqueezy.js": "^4.0.0",
     "@tailwindcss/postcss": "^4.2.2",
     "@upstash/redis": "^1.37.0",
     "next": "^14.2.35",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "resend": "^6.10.0",
+    "stripe": "^21.0.1",
     "tailwindcss": "^4.2.2"
   },
   "devDependencies": {
