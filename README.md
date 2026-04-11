@@ -5,7 +5,7 @@ AI-powered UCAS personal statement reviewer for UK university applicants. Built 
 ## Product Flow
 
 1. User pastes their personal statement + email on the homepage
-2. Free analysis runs via Claude — returns overall score and first criterion (Passion & Motivation)
+2. Free analysis runs via Claude - returns overall score and first criterion (Passion & Motivation)
 3. Results page shows the free preview with 4 locked criteria cards
 4. User pays £4.99 via Stripe Checkout to unlock the full analysis
 5. Stripe webhook triggers a second Claude call; full results stored in Redis
@@ -99,10 +99,10 @@ shortlisted/
 │   ├── results/
 │   │   └── page.tsx         # Results + polling page
 │   └── api/
-│       ├── analyse/route.ts # POST — free Claude analysis
-│       ├── checkout/route.ts# POST — Stripe checkout session
-│       ├── webhook/route.ts # POST — Stripe webhook + paid analysis
-│       └── results/route.ts # GET  — fetch from Redis
+│       ├── analyse/route.ts # POST - free Claude analysis
+│       ├── checkout/route.ts# POST - Stripe checkout session
+│       ├── webhook/route.ts # POST - Stripe webhook + paid analysis
+│       └── results/route.ts # GET  - fetch from Redis
 ├── components/
 │   ├── ScoreRing.tsx        # SVG circular progress ring
 │   ├── CriterionCard.tsx    # Criterion card (locked/unlocked)

@@ -84,7 +84,7 @@ function ResultsContent() {
           router.replace(`/results?id=${sessionId}`);
         }
       } catch {
-        // silent — keep polling
+        // silent - keep polling
       }
     }, 2000);
 
@@ -251,7 +251,7 @@ function ResultsContent() {
           </div>
         </section>
 
-        {/* Unlock CTA — only shown when not paid */}
+        {/* Unlock CTA - only shown when not paid */}
         {!isPaid && !polling && (
           <div className="rounded-2xl border-2 border-dashed border-orange-200 bg-white p-8 text-center">
             <div className="mb-4">
@@ -318,7 +318,7 @@ function ResultsContent() {
                   Redirecting to payment…
                 </span>
               ) : (
-                "Unlock full analysis — £4.99"
+                "Unlock full analysis - £4.99"
               )}
             </button>
             <p className="text-xs text-gray-400 mt-3">

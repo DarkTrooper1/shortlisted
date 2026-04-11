@@ -77,7 +77,7 @@ export default function HomePage() {
           </h1>
           <p className="text-lg text-gray-500 max-w-xl mx-auto">
             Paste your UCAS personal statement below for an honest, expert-level
-            AI review — scored the way a competitive admissions tutor reads it.
+            AI review - scored the way a competitive admissions tutor reads it.
           </p>
         </div>
 

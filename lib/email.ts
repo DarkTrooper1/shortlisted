@@ -45,7 +45,7 @@ export async function sendResultsEmail(
   await getResend().emails.send({
     from: "Shortlisted <results@shortlisted.app>",
     to: email,
-    subject: `Your UCAS personal statement results — ${analysis.overall_score}/100`,
+    subject: `Your UCAS personal statement results - ${analysis.overall_score}/100`,
     html: `
 <!DOCTYPE html>
 <html>

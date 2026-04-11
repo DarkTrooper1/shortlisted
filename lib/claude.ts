@@ -4,7 +4,7 @@ function getClient() {
   return new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! });
 }
 
-export const SYSTEM_PROMPT = `You are an expert UCAS personal statement reviewer with 15 years of experience as a UK university admissions tutor. You have reviewed thousands of personal statements across all subject areas. Score rigorously — the way a competitive admissions tutor reads them, not a supportive teacher. Do not inflate scores. An average statement scores 5–6. 8+ must be genuinely earned. Respond in valid JSON only, no preamble.`;
+export const SYSTEM_PROMPT = `You are an expert UCAS personal statement reviewer with 15 years of experience as a UK university admissions tutor. You have reviewed thousands of personal statements across all subject areas. Score rigorously - the way a competitive admissions tutor reads them, not a supportive teacher. Do not inflate scores. An average statement scores 5–6. 8+ must be genuinely earned. Respond in valid JSON only, no preamble.`;
 
 export async function runFreeAnalysis(statement: string): Promise<string> {
   const client = getClient();
@@ -18,7 +18,7 @@ export async function runFreeAnalysis(statement: string): Promise<string> {
         content: `Analyse this UCAS personal statement. Return ONLY valid JSON matching this exact shape:
 {
   "overall_score": <number 0-100>,
-  "overall_verdict": "<1 sentence — the single most important thing to fix>",
+  "overall_verdict": "<1 sentence - the single most important thing to fix>",
   "overall_summary": "<2-3 sentences, honest assessment>",
   "criteria": {
     "passion_motivation": {
@@ -56,7 +56,7 @@ export async function runPaidAnalysis(statement: string): Promise<string> {
         content: `Analyse this UCAS personal statement in full detail. Return ONLY valid JSON matching this exact shape:
 {
   "overall_score": <number 0-100>,
-  "overall_verdict": "<1 sentence — the single most important thing to fix>",
+  "overall_verdict": "<1 sentence - the single most important thing to fix>",
   "overall_summary": "<2-3 sentences, honest assessment>",
   "criteria": {
     "passion_motivation": {
